@@ -12,6 +12,11 @@ scripts/check_binary_size.js "platform/android/MapboxGLAndroidSDK/build/intermed
 # Track overall library size
 scripts/check_binary_size.js "platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar" "Android AAR"
 
-if [[ $CIRCLE_BRANCH == master ]]; then
-    scripts/publish_binary_size.js
-fi
+# Uncomment before merging
+# if [[ $CIRCLE_BRANCH == master ]]; then
+#   # Build source data for http://mapbox.github.io/mapbox-gl-native/metrics/binary-size/
+#   and log binary sizes to metrics warehouse
+#   scripts/publish_binary_size.js
+# fi
+
+scripts/publish_binary_size.js # Remove before merging

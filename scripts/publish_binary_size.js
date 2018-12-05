@@ -33,13 +33,16 @@ github.authenticate({type: 'app', token});
 const platforms = [
     { 'platform': 'iOS', 'arch': 'armv7' },
     { 'platform': 'iOS', 'arch': 'arm64' },
+    { 'platform': 'iOS', 'arch': 'Dynamic' },
     { 'platform': 'Android', 'arch': 'arm-v7' },
     { 'platform': 'Android', 'arch': 'arm-v8' },
     { 'platform': 'Android', 'arch': 'x86' },
     { 'platform': 'Android', 'arch': 'x86_64' }
 ];
 
+const sizeCheckInfo = [];
 const rows = [];
+const date = new Date();
 
 function query(after) {
     return github.request({
@@ -84,6 +87,7 @@ function query(after) {
               }
             }`
     }).then((result) => {
+        
         const history = result.data.data.repository.ref.target.history;
 
         for (const edge of history.edges) {
@@ -106,28 +110,66 @@ function query(after) {
 
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
-
             rows.push(row);
         }
 
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
-            return new AWS.S3({region: 'us-east-1'}).putObject({
-                Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
-                Bucket: 'mapbox',
-                Key: 'mapbox-gl-native/metrics/binary-size/data.json',
-                ACL: 'public-read',
-                CacheControl: 'max-age=300',
-                ContentEncoding: 'gzip',
-                ContentType: 'application/json'
-            }).promise();
+          
+          const latestRun = rows[0]
+          const runSizeMeasurements = latestRun.slice(0)
+
+          for (let i = 0; i < platforms.length; i++) {
+              const {platform, arch} = platforms[i];
+
+              sizeCheckInfo.push(JSON.stringify({
+                  'sdk': 'maps',
+                  'platform' : platform,
+                  'arch': arch,
+                  'size' : runSizeMeasurements[i],
+                  'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+              }));
+          }
         }
     });
 }
 
 github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATION_ID})
-    .then(({data}) => {
-        github.authenticate({type: 'token', token: data.token});
-        return query();
+.then(({data}) => {
+    github.authenticate({type: 'token', token: data.token});
+
+    return query().then(function() {
+      new AWS.S3({region: 'us-east-1'}).putObject({
+          Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
+          Bucket: 'mapbox',
+          Key: 'mapbox-gl-native/metrics/binary-size/data.json',
+          ACL: 'public-read',
+          CacheControl: 'max-age=300',
+          ContentEncoding: 'gzip',
+          ContentType: 'application/json'
+      }, function (putObjectError, res) {
+        if (putObjectError) {
+          console.log("Error uploading data.json ", putObjectError);
+        } else {
+          console.log("Successfully uploaded data.json");
+        }
+      });
+      
+      new AWS.S3({region: 'us-east-1'}).putObject({
+            Body: zlib.gzipSync(sizeCheckInfo.join('\n')),
+            Bucket: 'mapbox-loading-dock',
+            Key: `raw/nadia_staging_test_v4/${process.env['CIRCLE_SHA1']}.json.gz`,
+            CacheControl: 'max-age=300',
+            ContentType: 'application/json'
+        }, function (putObjectError, res) {
+          if (putObjectError) {
+            console.log("Error uploading new binary size metrics: ", putObjectError);
+          } else {
+            console.log("Successfully uploaded new binary size metrics");
+          }
+      });
     });
+});
+
+  
