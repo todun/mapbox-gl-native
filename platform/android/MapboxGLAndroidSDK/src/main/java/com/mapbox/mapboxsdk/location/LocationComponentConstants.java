@@ -54,6 +54,7 @@ final class LocationComponentConstants {
   static final String BACKGROUND_LAYER = "mapbox-location-stroke-layer";
   static final String ACCURACY_LAYER = "mapbox-location-accuracy-layer";
   static final String BEARING_LAYER = "mapbox-location-bearing-layer";
+  static final String PROPERTY_PULSING_CIRCLE_LAYER = "mapbox-location-pulsing-circle-layer";
 
   // Icons
   static final String FOREGROUND_ICON = "mapbox-location-icon";
