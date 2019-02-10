@@ -87,7 +87,7 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
-    struct TextBuffer {
+    struct Buffer {
         gl::VertexVector<SymbolLayoutVertex> vertices;
         gl::VertexVector<SymbolDynamicLayoutAttributes::Vertex> dynamicVertices;
         gl::VertexVector<SymbolOpacityAttributes::Vertex> opacityVertices;
@@ -103,19 +103,8 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
 
-    struct IconBuffer {
-        gl::VertexVector<SymbolLayoutVertex> vertices;
-        gl::VertexVector<SymbolDynamicLayoutAttributes::Vertex> dynamicVertices;
-        gl::VertexVector<SymbolOpacityAttributes::Vertex> opacityVertices;
-        gl::IndexVector<gl::Triangles> triangles;
-        SegmentVector<SymbolIconAttributes> segments;
-        std::vector<PlacedSymbol> placedSymbols;
+    struct IconBuffer : public Buffer {
         PremultipliedImage atlasImage;
-
-        optional<gl::VertexBuffer<SymbolLayoutVertex>> vertexBuffer;
-        optional<gl::VertexBuffer<SymbolDynamicLayoutAttributes::Vertex>> dynamicVertexBuffer;
-        optional<gl::VertexBuffer<SymbolOpacityAttributes::Vertex>> opacityVertexBuffer;
-        optional<gl::IndexBuffer<gl::Triangles>> indexBuffer;
     } icon;
 
     struct CollisionBuffer {
