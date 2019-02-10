@@ -192,7 +192,7 @@ std::unique_ptr<Expression> format(const char* value) {
     
 std::unique_ptr<Expression> format(std::unique_ptr<Expression> input) {
     std::vector<FormatExpressionSection> sections;
-    sections.emplace_back(std::move(input), nullopt, nullopt);
+    sections.emplace_back(std::move(input), nullopt, nullopt, nullopt);
     return std::make_unique<FormatExpression>(sections);
 }
     
