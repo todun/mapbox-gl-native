@@ -13,6 +13,10 @@ target_link_libraries(mbgl-filesource
     PUBLIC expected
 )
 
+target_compile_definitions(mbgl-filesource PRIVATE
+    DEBUG=1
+)
+
 mbgl_filesource()
 
 create_source_groups(mbgl-filesource)
