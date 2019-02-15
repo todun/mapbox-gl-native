@@ -1,0 +1,40 @@
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
+
+    configurations = ['archives']
+
+    dryRun = false // Whether to run this as dry-run, without deploying
+    publish = true // Whether version should be auto published after an upload
+    override = project.hasProperty('publishOverride') ? project.property('publishOverride').toBoolean() : false // Whether to override version artifacts already published
+
+    pkg {
+        userOrg = rootProject.ext.mapboxArtifactUserOrg
+        repo = rootProject.ext.mapboxArtifactRepo
+        name = rootProject.ext.mapboxArtifactName
+        desc = rootProject.ext.mapboxArtifactDescription
+
+        websiteUrl = rootProject.ext.mapboxArtifactUrl
+        issueTrackerUrl = rootProject.ext.mapboxArtifactTrackerUrl
+        vcsUrl = rootProject.ext.mapboxArtifactGitUrl
+
+        licenses = [rootProject.ext.mapboxLicenseName]
+
+        version {
+            name = rootProject.ext.versionName
+            desc = rootProject.ext.mapboxArtifactDescription
+            released = new Date()
+
+/*
+            gpg {
+                sign = false
+                passphrase = project.hasProperty('gpgPassphrase') ? project.property('gpgPassphrase') : System.getenv('GPG_PASSPHRASE')
+            }
+*/
+
+            mavenCentralSync {
+                sync = false
+            }
+        }
+    }
+}

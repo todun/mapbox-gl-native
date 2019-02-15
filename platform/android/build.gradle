@@ -9,6 +9,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.3.0'
         classpath dependenciesList.licensesPlugin
         classpath dependenciesList.kotlinPlugin
+        classpath dependenciesList.bintrayPlugin
     }
 }
 
@@ -17,6 +18,8 @@ allprojects {
         mavenCentral()
         google()
         jcenter()
+        // For files to Bintray
+        maven { url 'https://mapbox.bintray.com/mapbox' }
         // Snapshot repository
         //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
     }
@@ -29,3 +32,4 @@ subprojects {
 // Load build system information. If this file does not exist, run
 // `make platform/android/gradle/configuration.gradle`
 apply from: "${rootDir}/gradle/configuration.gradle"
+apply plugin: 'com.jfrog.bintray'
