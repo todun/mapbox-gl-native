@@ -29,6 +29,14 @@ LatLng::LatLng(const UnwrappedTileID& id)
       lon(lon_(id.canonical.z, id.canonical.x) + id.wrap * util::DEGREES_MAX) {
 }
 
+void LatLng::wrap() {
+    // util::wrap excludes max, so we special case it here.
+    if (lon == util::LONGITUDE_MAX) {
+        return;
+    }
+    lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
+}
+
 LatLngBounds::LatLngBounds(const CanonicalTileID& id)
     : sw({ lat_(id.z, id.y + 1), lon_(id.z, id.x) }),
       ne({ lat_(id.z, id.y), lon_(id.z, id.x + 1) }) {

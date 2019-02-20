@@ -53,9 +53,7 @@ public:
 
     LatLng wrapped() const { return { lat, lon, Wrapped }; }
 
-    void wrap() {
-        lon = util::wrap(lon, -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
-    }
+    void wrap();
 
     // If the distance from start to end longitudes is between half and full
     // world, unwrap the start longitude to ensure the shortest path is taken.
