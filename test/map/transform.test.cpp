@@ -641,6 +641,16 @@ TEST(Transform, LatLngBounds) {
     ASSERT_EQ(transform.getLatLng().latitude(), inside.latitude());
     ASSERT_EQ(transform.getLatLng().longitude(), -179.0);
 
+    // Constrain to the left edge.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), 119.0 }));
+    ASSERT_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
+
+    // Constrain to the right edge.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), -119.0 }));
+    ASSERT_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), -120.0);
+
     //    -1   |   0   |  +1
     // ┌───┬───┰───┬───┰───┬───┐
     // │   │   ┃   │   ┃   │   │
@@ -662,6 +672,16 @@ TEST(Transform, LatLngBounds) {
     transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), -181.0 }));
     ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), inside.latitude());
     ASSERT_EQ(transform.getLatLng().longitude(), 179.0);
+
+    // Constrain to the left edge.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), -119.0 }));
+    ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), -120.0);
+
+    // Constrain to the right edge.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), 119.0 }));
+    ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 }
 
 TEST(Transform, PitchBounds) {

@@ -107,10 +107,24 @@ LatLng LatLngBounds::constrain(const LatLng& p) const {
         return p;
     }
 
+    double minLng = sw.longitude();
+    double maxLng = ne.longitude();
+
+    if (!containsLng && crossesAntimeridian()) {
+        const LatLngBounds wrapped(sw.wrapped(), ne.wrapped());
+        const double distanceToWest = std::abs(p.longitude() - wrapped.sw.longitude());
+        const double distanceToEast = std::abs(p.longitude() - wrapped.ne.longitude());
+        if (distanceToWest > distanceToEast) {
+            std::swap(minLng, maxLng);
+        } else {
+            minLng = wrapped.sw.longitude();
+        }
+    }
+
     return LatLng {
         containsLat ? p.latitude() : util::clamp(p.latitude(), sw.latitude(), ne.latitude()),
-        containsLng ? p.longitude() : util::clamp(p.longitude(), sw.longitude(), sw.latitude())
-    };
+        containsLng ? p.longitude() : util::clamp(p.longitude(), minLng, maxLng)
+    }.wrapped();
 }
 
 bool LatLngBounds::containsLatitude(double latitude) const {
