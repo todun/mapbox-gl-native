@@ -586,20 +586,82 @@ TEST(Transform, LatLngBounds) {
     transform.setLatLngBounds(LatLngBounds::singleton(sanFrancisco));
     ASSERT_EQ(transform.getLatLng(), sanFrancisco);
 
+    //    -1   |   0   |  +1
+    // ┌───┬───┰───┬───┰───┬───┐
+    // │   │   ┃•  │   ┃   │   │
+    // ├───┼───╂───┼───╂───┼───┤
+    // │   │   ┃▓▓▓│▓▓▓┃   │   │
+    // └───┴───┸───┴───┸───┴───┘
     transform.setLatLngBounds(LatLngBounds::hull({ -90.0, -180.0 }, { 0.0, 180.0 }));
     transform.jumpTo(CameraOptions().withCenter(sanFrancisco));
     ASSERT_EQ(transform.getLatLng().latitude(), 0.0);
     ASSERT_EQ(transform.getLatLng().longitude(), sanFrancisco.longitude());
 
+    //    -1   |   0   |  +1
+    // ┌───┬───┰───┬───┰───┬───┐
+    // │   │   ┃•  │▓▓▓┃   │   │
+    // ├───┼───╂───┼───╂───┼───┤
+    // │   │   ┃   │▓▓▓┃   │   │
+    // └───┴───┸───┴───┸───┴───┘
     transform.setLatLngBounds(LatLngBounds::hull({ -90.0, 0.0 }, { 90.0, 180.0 }));
     transform.jumpTo(CameraOptions().withCenter(sanFrancisco));
     ASSERT_EQ(transform.getLatLng().latitude(), sanFrancisco.latitude());
     ASSERT_EQ(transform.getLatLng().longitude(), 0.0);
 
+    //    -1   |   0   |  +1
+    // ┌───┬───┰───┬───┰───┬───┐
+    // │   │   ┃•  │   ┃   │   │
+    // ├───┼───╂───┼───╂───┼───┤
+    // │   │   ┃   │▓▓▓┃   │   │
+    // └───┴───┸───┴───┸───┴───┘
     transform.setLatLngBounds(LatLngBounds::hull({ -90.0, 0.0 }, { 0.0, 180.0 }));
     transform.jumpTo(CameraOptions().withCenter(sanFrancisco));
     ASSERT_EQ(transform.getLatLng().latitude(), 0.0);
     ASSERT_EQ(transform.getLatLng().longitude(), 0.0);
+
+    //    -1   |   0   |  +1
+    // ┌───┬───┰───┬───┰───┬───┐
+    // │   │   ┃   │  ▓┃▓  │   │
+    // ├───┼───╂───┼───╂───┼───┤
+    // │   │   ┃   │   ┃   │   │
+    // └───┴───┸───┴───┸───┴───┘
+    LatLng inside { 45.0, 180.0 };
+    transform.setLatLngBounds(LatLngBounds::hull({ 0.0, 120.0 }, { 90.0, 240.0 }));
+    transform.jumpTo(CameraOptions().withCenter(inside));
+    ASSERT_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_EQ(transform.getLatLng().longitude(), inside.longitude());
+
+    // Constrain latitude only.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { -45.0, inside.longitude() }));
+    ASSERT_EQ(transform.getLatLng().latitude(), 0.0);
+    ASSERT_EQ(transform.getLatLng().longitude(), inside.longitude());
+
+    // Crossing the antimeridian, but within bounds.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), 181.0 }));
+    ASSERT_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_EQ(transform.getLatLng().longitude(), -179.0);
+
+    //    -1   |   0   |  +1
+    // ┌───┬───┰───┬───┰───┬───┐
+    // │   │   ┃   │   ┃   │   │
+    // ├───┼───╂───┼───╂───┼───┤
+    // │   │  ▓┃▓  │   ┃   │   │
+    // └───┴───┸───┴───┸───┴───┘
+    inside = LatLng{ -45.0, 180.0 };
+    transform.setLatLngBounds(LatLngBounds::hull({ -90.0, -240.0 }, { 0.0, -120.0 }));
+    transform.jumpTo(CameraOptions().withCenter(inside));
+    ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_EQ(transform.getLatLng().longitude(), inside.longitude());
+
+    // Constrain latitude only.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { 45.0, inside.longitude() }));
+    ASSERT_EQ(transform.getLatLng().latitude(), 0.0);
+    ASSERT_EQ(transform.getLatLng().longitude(), inside.longitude());
+
+    // Crossing the antimeridian, but within bounds.
+    transform.jumpTo(CameraOptions().withCenter(LatLng { inside.latitude(), -181.0 }));
+    ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), inside.latitude());
+    ASSERT_EQ(transform.getLatLng().longitude(), 179.0);
 }
 
 TEST(Transform, PitchBounds) {
